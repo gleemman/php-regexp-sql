@@ -10,7 +10,7 @@ function updatePdo($table,$fields,$where = '',$count=0) {
 	$dsn="$dbms:host=$host;dbname=$dbName";
 
 
-	*///默认这个不是长连接，如果需要数据库长连接，需要最后加一个参数：array(PDO::ATTR_PERSISTENT => true) 变成这样：
+	//默认这个不是长连接，如果需要数据库长连接，需要最后加一个参数：array(PDO::ATTR_PERSISTENT => true) 变成这样：
 	$db = new PDO($dsn, $user, $pass, array(PDO::ATTR_PERSISTENT => true));
 
 
