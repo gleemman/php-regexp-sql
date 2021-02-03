@@ -34,10 +34,10 @@ function updatePdo($table,$fields,$where = '',$count=0) {
 
 	//条件:AND OR !=
 	//$where = str_replace(array('\\'),array('\\\\'),$where);
-	$where = ' '.trim($where).' ';
+	$where = ' '.addcslashes(trim($where),'\\').' ';
+	echo $where;
 
-
-	$regexp = '/\s*`?([a-zA-Z\d+_]+)`?\s*(=|<>|!=|LIKE)\s*(?(?=[\'\"])([\'\"])(.*?(?(?<=\\\)\\\\|(?<!\\\)))\3|(\d+))\s*/is';
+	$regexp = '/\s*`?([a-zA-Z\d+_]+)`?\s*(=|<>|!=|LIKE)\s*(?(?=[\'\"])([\'\"])(.*?(?(?<=\\\)(\\\\)*|(?<!\\\)))\3|(\d+))\s*/is';
 	preg_match_all($regexp,$where,$ms);
 	var_dump($ms);
 	if (isset($ms[1]) && is_array($ms[1])) foreach($ms[1] as $k=>$v) {
@@ -45,7 +45,7 @@ function updatePdo($table,$fields,$where = '',$count=0) {
 		$searchs[] = $_sv = $ms[0][$k];
 		$vkey = ':where_'.$k;
 		$replaces[] = ' `'.$ms[1][$k].'` '.$ms[2][$k].' '.$vkey.' ';
-		$values[$vkey] = strlen($ms[5][$k])?$ms[5][$k]:$ms[4][$k];
+		$values[$vkey] = stripslashes(strlen($ms[6][$k])?$ms[6][$k]:$ms[4][$k]);
 
 	}
 
@@ -59,6 +59,7 @@ function updatePdo($table,$fields,$where = '',$count=0) {
 		$sql .= " LIMIT ".$count;
 	}
 	var_dump($values);
+	var_dump($sql);
 	
 	//return 0;
 
@@ -75,9 +76,15 @@ function updatePdo($table,$fields,$where = '',$count=0) {
 			$err[1] = $stmt->errorCode();
 		}
 		return [$sql,$err[1],$err[2]];
+		
 	}
 	return 0;
 }
 
-var_dump(updatePdo("tb_unicom_area",['city_code'=>113],'`district`="东城\\\"区\\\" AND (city = "") AND city_no=110100'));
+
+$district = $_GET['district'];
+//$district = addslashes('东\"城区\\\\');
+$district = '东"城区';
+
+var_dump(updatePdo("tb_unicom_area",['city_code'=>116],"`district`='".$district."' AND (city = '') AND city_no=110100"));
 
